@@ -54,9 +54,6 @@ hexadd top bottom = let pre = if (hcount top) < (hcount bottom)
                     in  Hex combinedD (hcount bottom)
 
 
-instance Semigroup Hex where
-  (<>) = hexadd
-
 gengen :: Int -> Int -> [[Diagram B]]
 gengen minm maxm = let a = [minm .. maxm]  ++ (reverse [minm..maxm-1])
                        b = [0 .. (length a - 1)]
@@ -68,7 +65,7 @@ gengen2 :: [[Diagram B]] -> [Hex]
 gengen2 = map (\x -> Hex (hcat x) (length x)) 
 
 egg :: Diagram B
-egg = hdiagram . (foldl (<>) (Hex mempty 0)) . gengen2 $ (gengen 1 4)
+egg = hdiagram . (foldl hexadd (Hex mempty 0)) . gengen2 $ (gengen 1 4)
 
 main :: IO ()
 main = renderSVG "hello2.svg" sizE egg
