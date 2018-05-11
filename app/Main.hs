@@ -15,42 +15,33 @@ rotate ::Int ->  [a] -> [a]
 rotate _ [] = []
 rotate n xs = zipWith const (drop n (cycle xs)) xs 
 
+
 sizE :: SizeSpec V2 Double
 sizE = dims2D 800 800
 
+
 rawPolygon :: Diagram B
-rawPolygon =  polygon $  PolygonOpts (PolyRegular 6 4) OrientV origin
+rawPolygon =  polygon $ PolygonOpts (PolyRegular 6 4) OrientV origin
 
-bp :: Diagram B
-bp = rawPolygon # fc black 
-
-wp :: Diagram B
-wp = rawPolygon # fc white
-
-rp :: Diagram B
-rp = rawPolygon # fc red
-
-cake :: Diagram B
-cake = (bp ||| wp ||| rp) # showOrigin
 
 t :: [Diagram B]
-t =  [bp,wp,rp]
+t =  map (\x -> rawPolygon # fc x) [black, white, red]
 
 
 topLeftHex :: Diagram B -> Diagram B
-topLeftHex x = x # snugL # snugT
+topLeftHex = snugT . snugL
+
 
 topRightHex :: Diagram B -> Diagram B
-topRightHex x = x # snugR # snugT
+topRightHex = snugT . snugR
 
 
 xx :: Diagram B -> Diagram B
 xx = snugL . alignB 
 
 
-
 hexadd :: (Diagram B, Int) -> [Diagram B] -> (Diagram B, Int)
-hexadd (mempty, 0) x = ((hcat x) # xx # showOrigin, length x) 
+hexadd (mempty, 0) x = ((xx . hcat $ x) , length x) 
 hexadd (top,pcount) bottom = let gradient = (length bottom) > pcount
                                  ff = if gradient 
                                          then topRightHex
@@ -67,8 +58,9 @@ gengen minm maxm = let a = [minm .. maxm] ++ (reverse [minm..maxm-1])
 
 
 
-egg :: Diagram B
-egg = fst  (foldl hexadd (mempty,0) (gengen 2 12))
+chessboard :: Diagram B
+chessboard = fst . (foldl hexadd (mempty,0)) $ gengen 34 50
+
 
 main :: IO ()
-main = renderSVG "hello2.svg" sizE egg
+main = renderSVG "hello2.svg" sizE chessboard
