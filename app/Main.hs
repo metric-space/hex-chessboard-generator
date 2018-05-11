@@ -36,8 +36,6 @@ cake = (bp ||| wp ||| rp) # showOrigin
 t :: [Diagram B]
 t =  [bp,wp,rp]
 
---  ((wp # snugL # snugY (-1)) <> (bp # snugT))
---
 
 topLeftHex :: Diagram B -> Diagram B
 topLeftHex x = x # snugL # snugT
@@ -58,19 +56,19 @@ hexadd (top,pcount) bottom = let gradient = (length bottom) > pcount
                                          then topRightHex
                                          else topLeftHex                                        
                                  nbottom = hcat . (map ff)$ bottom
-                             in ((top <> nbottom) # xx # showOrigin, length bottom)
+                             in ((top <> nbottom) # xx, length bottom)
 
 
 gengen :: Int -> Int -> [[Diagram B]]
-gengen minm maxm = let a = [minm .. maxm]  ++ (reverse [minm..maxm-1])
-                       b = [0 .. (length a - 1)]
-                       c = cycle t
-                   in map (\(x,y) -> Main.rotate x $ take y c) (zip b a)
+gengen minm maxm = let a = [minm .. maxm] ++ (reverse [minm..maxm-1])
+                       b = [0 .. (maxm - minm)]
+                       c = b ++ (reverse . init $ b)
+                   in map (\(x,y) -> (take y) . cycle $ Main.rotate x t) (zip c a)
 
 
 
 egg :: Diagram B
-egg = fst  (foldl hexadd (mempty,0) (gengen 1 4))
+egg = fst  (foldl hexadd (mempty,0) (gengen 2 12))
 
 main :: IO ()
 main = renderSVG "hello2.svg" sizE egg
