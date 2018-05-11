@@ -39,19 +39,26 @@ t =  [bp,wp,rp]
 --  ((wp # snugL # snugY (-1)) <> (bp # snugT))
 --
 
-data Hex = Hex {hdiagram :: Diagram B, hcount :: Int} 
+topLeftHex :: Diagram B -> Diagram B
+topLeftHex x = x # snugL # snugT
 
-hexadd :: Hex -> Hex -> Hex
-hexadd (Hex mempty 0) x = x 
-hexadd x (Hex mempty 0) = x
-hexadd top bottom = let pre = if (hcount top) < (hcount bottom)
-                                 then (\x -> x # alignL  # snugB # showOrigin)
-                                 else (\x -> x # snugB # snugL # showOrigin)
-                        bpre = if (hcount top) < (hcount bottom)
-                                 then snugT
-                                 else (snugT . snugL)
-                        combinedD = (top # hdiagram # pre) <> (bottom # hdiagram # bpre)
-                    in  Hex combinedD (hcount bottom)
+topRightHex :: Diagram B -> Diagram B
+topRightHex x = x # snugR # snugT
+
+
+xx :: Diagram B -> Diagram B
+xx = snugL . alignB 
+
+
+
+hexadd :: (Diagram B, Int) -> [Diagram B] -> (Diagram B, Int)
+hexadd (mempty, 0) x = ((hcat x) # xx # showOrigin, length x) 
+hexadd (top,pcount) bottom = let gradient = (length bottom) > pcount
+                                 ff = if gradient 
+                                         then topRightHex
+                                         else topLeftHex                                        
+                                 nbottom = hcat . (map ff)$ bottom
+                             in ((top <> nbottom) # xx # showOrigin, length bottom)
 
 
 gengen :: Int -> Int -> [[Diagram B]]
@@ -61,11 +68,9 @@ gengen minm maxm = let a = [minm .. maxm]  ++ (reverse [minm..maxm-1])
                    in map (\(x,y) -> Main.rotate x $ take y c) (zip b a)
 
 
-gengen2 :: [[Diagram B]] -> [Hex]
-gengen2 = map (\x -> Hex (hcat x) (length x)) 
 
 egg :: Diagram B
-egg = hdiagram . (foldl hexadd (Hex mempty 0)) . gengen2 $ (gengen 1 4)
+egg = fst  (foldl hexadd (mempty,0) (gengen 1 4))
 
 main :: IO ()
 main = renderSVG "hello2.svg" sizE egg
