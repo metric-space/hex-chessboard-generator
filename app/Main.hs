@@ -41,25 +41,25 @@ xx = snugL . alignB
 
 
 hexadd :: (Diagram B, Int) -> [Diagram B] -> (Diagram B, Int)
-hexadd (mempty, 0) x = ((xx . hcat $ x) , length x) 
-hexadd (top,pcount) bottom = let gradient = (length bottom) > pcount
+hexadd (mempty, 0) x = (xx . hcat $ x , length x) 
+hexadd (top,pcount) bottom = let gradient = length bottom > pcount
                                  ff = if gradient 
                                          then topRightHex
                                          else topLeftHex                                        
-                                 nbottom = hcat . (map ff)$ bottom
+                                 nbottom = hcat . map ff $ bottom
                              in ((top <> nbottom) # xx, length bottom)
 
 
 gengen :: Int -> Int -> [[Diagram B]]
-gengen minm maxm = let a = [minm .. maxm] ++ (reverse [minm..maxm-1])
+gengen minm maxm = let a = [minm .. maxm] ++ reverse [minm..maxm-1]
                        b = [0 .. (maxm - minm)]
                        c = b ++ (reverse . init $ b)
-                   in map (\(x,y) -> (take y) . cycle $ Main.rotate x t) (zip c a)
+                   in map (\(x,y) -> take y . cycle $ Main.rotate x t) (zip c a)
 
 
 
 chessboard :: Diagram B
-chessboard = fst . (foldl hexadd (mempty,0)) $ gengen 34 50
+chessboard = fst . foldl hexadd (mempty,0) $ gengen 34 50
 
 
 main :: IO ()
