@@ -24,6 +24,7 @@ dependencies:
 - diagrams
 - diagrams-lib
 - diagrams-svg
+- optparse-applicative
 
 library:
   source-dirs: src
